@@ -11,6 +11,8 @@
     "@types/compression": "^1.7.5",
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.4",
+    "@unhead/ssr": "1.9.16",
+    "@unhead/vue": "1.9.16",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/compiler-sfc": "^3.3.10",
     "@vue/server-renderer": "^3.3.10",

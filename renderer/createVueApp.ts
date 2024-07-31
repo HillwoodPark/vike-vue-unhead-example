@@ -6,6 +6,7 @@ import { setData } from './useData'
 import Layout from './Layout.vue'
 import type { PageContext } from 'vike/types'
 import { objectAssign } from './utils'
+import { createHead } from '@unhead/vue'
 
 function createVueApp(pageContext: PageContext) {
   const pageContextRef = shallowRef(pageContext)
@@ -16,6 +17,10 @@ function createVueApp(pageContext: PageContext) {
   const app = createSSRApp(RootComponent)
   setPageContext(app, pageContextRef)
   setData(app, dataRef)
+
+  const head = createHead()
+  app.use(head)
+
 
   // app.changePage() is called upon navigation, see +onRenderClient.ts
   objectAssign(app, {

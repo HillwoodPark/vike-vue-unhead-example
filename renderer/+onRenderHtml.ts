@@ -5,9 +5,9 @@ import { renderToString as renderToString_ } from '@vue/server-renderer'
 import type { App } from 'vue'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 import { createVueApp } from './createVueApp'
-import logoUrl from './logo.svg'
 import type { OnRenderHtmlAsync } from 'vike/types'
-import { getPageTitle } from './getPageTitle'
+import { renderSSRHead } from '@unhead/ssr'
+import { getActiveHead } from 'unhead'
 
 const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
   // This onRenderHtml() hook only supports SSR, see https://vike.dev/render-modes for how to modify
@@ -15,24 +15,23 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
   if (!pageContext.Page) throw new Error('My render() hook expects pageContext.Page to be defined')
 
   const app = createVueApp(pageContext)
-
+    
+  const head = getActiveHead();
+  if (!head) throw new Error('No active unhead head. Ensure you have installed unhead by calling createHead and app.use(head).')
+  
   const appHtml = await renderToString(app)
 
-  // https://vike.dev/head
-  const title = getPageTitle(pageContext)
-  const desc = pageContext.data?.description || pageContext.config.description || 'Demo of using Vike'
+  const { headTags, bodyTags, bodyTagsOpen, htmlAttrs, bodyAttrs } = await renderSSRHead(head)
 
   const documentHtml = escapeInject`<!DOCTYPE html>
-    <html lang="en">
+      <html ${dangerouslySkipEscape(htmlAttrs)}>  
       <head>
-        <meta charset="UTF-8" />
-        <link rel="icon" href="${logoUrl}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="${desc}" />
-        <title>${title}</title>
+        ${dangerouslySkipEscape(headTags)}
       </head>
-      <body>
+      <body ${dangerouslySkipEscape(bodyAttrs)}>
+        ${dangerouslySkipEscape(bodyTagsOpen)}
         <div id="app">${dangerouslySkipEscape(appHtml)}</div>
+        ${dangerouslySkipEscape(bodyTags)}
       </body>
     </html>`
 
